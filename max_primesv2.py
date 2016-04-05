@@ -68,12 +68,15 @@ def main(args):
 	for i in range(0, numProcs):
 		highestPrime.append(q.get())
 
+	for i in range(0, numProcs):
+		p.join()
+
 	print (highestPrime)
 	
 
 	# After sending the signal this is to ensure the process is joined.
 	# Very likely uncessary.
-	p.join()
+	
 
 if __name__ == '__main__':
 	main(sys.argv)
