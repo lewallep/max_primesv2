@@ -22,14 +22,12 @@ def findPrimes(startIndex, calcRange, q, runTime, numProcs, endTime):
 	# This number is to be used as the 
 	divisor = 3
 
-
 	# outer while loop should start here because if it starts on an even number we do not want to calc it.
 	# outer while loop will have both a timer to check the termination condition
 	# and it will also check to ensure the current number is below the calcRange index.
 	# Each iteration will add the calc range * 12 to the start index.
 
 	while time.time() < endTime:
-
 		if currentNumber % 2 == 0:
 			currentNumber += 1
 		
@@ -40,8 +38,7 @@ def findPrimes(startIndex, calcRange, q, runTime, numProcs, endTime):
 					isPrime = False
 				divisor += 1
 
-			if isPrime == True:
-				
+			if isPrime == True:	
 				highestPrimeChild = currentNumber
 
 			currentNumber += 2
@@ -50,29 +47,29 @@ def findPrimes(startIndex, calcRange, q, runTime, numProcs, endTime):
 
 		currentNumber = endIndex + (numProcs * calcRange)
 		endIndex = currentNumber + calcRange
-
-		if time.time() < endTime:
+		if time.time() < endTime:	# This could be replaced by a Do While loop to save one of these checks.
 			print ("Highest prime in thread " + str(int(threadId)) + " is " + str(highestPrimeChild))
 			q.put(highestPrimeChild)
+
 
 	# outer while loop will end here.  After each iteration of the calc range, 
 	# a single highest prime will be placed in the queue.
 
 def main(args):
-	print ("You are in the main function.")
 	# Get the run time from the command line and convert it to a floating point. 
-	runTime = float(args[1])
+	runTime = float(args[2])
 	endTime = time.time() + runTime	
 
-	# Initialize the 
+	# Initialize queue and other variables
 	q = Queue()
-	
 	timeLeft = runTime
-
 	numProcs = mp.cpu_count()
-	
-	highestPrime = []
-	calcRange = int(args[2])
+	highestPrimeList = []		#List of higher primes to hold as they are taken from the queue.
+	calcRange = int(args[1])	#This adjusts the range of numbers to be computed for each thread.
+
+	primesCalculated = 0
+	whileCounter = 0		
+	highestPrime = 0
 
 	# Create a background process to calculate primes until it receives a signal
 	for i in range(0, numProcs):
@@ -81,23 +78,31 @@ def main(args):
 		p.start()
 
 	while timeLeft > 0:
+		print
 		print ("There are: " + str(timeLeft) + " seconds left to find a higher prime.")
+		print
 		time.sleep(1)
 		timeLeft -= 1
 
 	while not q.empty():
-		highestPrime.append(q.get())
+		highestPrimeList.append(q.get())
 
-	print 
+	primesCalculated = len(highestPrimeList)
+
+	# Count back the number of different processes used to ensure the highest prime from
+	# any one of the processes is the highest overall prime number.
+	while numProcs > whileCounter:
+		if highestPrimeList[primesCalculated - whileCounter - 1] > highestPrime:
+			highestPrime = highestPrimeList[primesCalculated - whileCounter - 1]
+		whileCounter += 1
+
+	print ()
 	print ("Time is up!")
-	print
+	print ()
+	print ("The Highest prime found in the given time was: " + str(highestPrime))
+	print ()
 
-	print
-	print (highestPrime[len(highestPrime) - 1])
-	print
-
-	print (highestPrime)	
-
+	# Clean up all of my child processes.
 	for i in range(0, numProcs):
 		p.join()
 
