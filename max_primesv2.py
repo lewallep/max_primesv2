@@ -1,11 +1,10 @@
 #!/usr/bin/python
-import sys, math, re, time, os, copy, traceback, subprocess, signal
+import sys, math, time, os
 import multiprocessing as mp
 from multiprocessing import Process, Queue
 
-def findPrimes(startIndex, calcRange, q, runTime, numProcs, endTime):
+def findPrimes(startIndex, calcRange, q, numProcs, endTime):
 	endIndex = startIndex + calcRange
-	print ("endIndex: " + str(endIndex))
 
 	# Keep a human meaningful of ID's of different threads.
 	threadId = startIndex / calcRange
@@ -44,6 +43,13 @@ def findPrimes(startIndex, calcRange, q, runTime, numProcs, endTime):
 			currentNumber += 2
 			isPrime = True
 			divisor = 3
+			# Due the the threads ending at different times I had to mute some of the progress of the primes to 
+			# not have the threads leak after the timer is done.
+			# Another theory on how to address this would be to terminate the process and only keep primes up 
+			# to this point with the timer.
+			# This will be attempted in version three after the submission.
+			#if time.time() < endTime:	# This could be replaced by a Do While loop to save one of these checks.
+				#print ("Highest prime in thread " + str(int(threadId)) + " is " + str(highestPrimeChild))
 
 		currentNumber = endIndex + (numProcs * calcRange)
 		endIndex = currentNumber + calcRange
@@ -74,7 +80,7 @@ def main(args):
 	# Create a background process to calculate primes until it receives a signal
 	for i in range(0, numProcs):
 		print (i)
-		p = Process(target = findPrimes, args = (calcRange * i, calcRange, q, runTime, numProcs, endTime))
+		p = Process(target = findPrimes, args = (calcRange * i, calcRange, q, numProcs, endTime))
 		p.start()
 
 	while timeLeft > 0:
