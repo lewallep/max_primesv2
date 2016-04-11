@@ -39,7 +39,10 @@ def findPrimes(startIndex, calcRange, q, numProcs, endTime):
 
 			if isPrime == True:	
 				highestPrimeChild = currentNumber
-
+				# if one wants to see every prime found a print statement can be added here.
+				if time.time() < endTime:
+					print ("Highest prime in thread so far " + str(int(threadId)) \
+						+ " is " + str(highestPrimeChild))
 			currentNumber += 2
 			isPrime = True
 			divisor = 3
@@ -54,7 +57,8 @@ def findPrimes(startIndex, calcRange, q, numProcs, endTime):
 		currentNumber = endIndex + (numProcs * calcRange)
 		endIndex = currentNumber + calcRange
 		if time.time() < endTime:	# This could be replaced by a Do While loop to save one of these checks.
-			print ("Highest prime in thread " + str(int(threadId)) + " is " + str(highestPrimeChild))
+			print ("Highest prime in thread so far " + str(int(threadId)) \
+				+ " is " + str(highestPrimeChild))
 			q.put(highestPrimeChild)
 
 
